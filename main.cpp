@@ -141,7 +141,8 @@ int main()
   }
 
   double damageAverage = vectorMeanAverage(simulation);
-  double damagePerSecond = (damageAverage / dragonClaws.attackSpeedTicks) / 0.6;
+  double damagePerTick = damageAverage / dragonClaws.attackSpeedTicks;
+  double damagePerSecond = damagePerTick / 0.6;
 
   std::cout << "\n"
             << "Simulated "    << simulation.size() << " attacks\n"
