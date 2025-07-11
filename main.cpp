@@ -5,118 +5,139 @@
 #include <string>
 #include <vector>
 
-template <typename T>
-double getAverage(std::vector<T> const& v)
-{
-  if(v.empty()) 
-  {
-    return 0;
-  }
+struct Weapon {
+  int attackSpeedTicks;
+  double accuracy;
+  int maxHit;
+};
 
-  return std::reduce(v.begin(), v.end(), 0.0) / v.size();
+int randomDamage (int minHit, int maxHit, std::mt19937_64& randomDamageGenerator)
+{
+  std::uniform_int_distribution<int> randomDamageDistribution(minHit, maxHit);
+  return randomDamageDistribution(randomDamageGenerator);
 }
 
-int randDamage(int minHit, int maxHit)
+void printDamageRoll (int attemptWidth, int attempt, int totalDamage, int firstHit, int secondHit, int thirdHit, int fourthHit)
 {
-  std::random_device rd;
-  std::mt19937_64 dmgGenerator(rd());
-  std::uniform_int_distribution<int> dmgDistribution(minHit, maxHit);
-  
-  return dmgDistribution(dmgGenerator);
+  std::cout << std::setw(attemptWidth) << std::right << attempt     << " : "
+            << std::setw(2)            << std::right << totalDamage << " = "
+            << std::setw(2)            << std::right << firstHit    << " + "
+            << std::setw(2)            << std::right << secondHit   << " + "
+            << std::setw(2)            << std::right << thirdHit    << " + "
+            << std::setw(2)            << std::right << fourthHit   << "\n";
+}
+
+template <typename T, typename A>
+double vectorMeanAverage (std::vector<T,A> const& vector)
+{
+   if (vector.empty()) { return 0; }
+   return static_cast<double>(std::reduce(vector.begin(), vector.end())) / vector.size();
 }
 
 int main()
 {
-  int maxhit = 33;
-  double accuracy = 0.4191;
-  int atkspd = 4;
-  int attempts = 100000;
-  
-  int attemptsWidth = std::to_string(attempts).length();
+  const bool verbose = false;
+
+  Weapon dragonClaws;
+  dragonClaws.attackSpeedTicks = 4;
+  dragonClaws.accuracy = 0.4191;
+  dragonClaws.maxHit = 33;
 
   std::vector<int> simulation;
+  const int simulationAttempts = 1000000;
+  const int attemptsWidth = std::to_string(simulationAttempts).length();
 
-  std::random_device rd;
-  std::mt19937_64 accGenerator(rd());
-  std::uniform_real_distribution<double> accDistribution(0.0, 1.0);
+  std::random_device rd1;
+  std::mt19937_64 accuracyGenerator(rd1());
+  std::uniform_real_distribution<double> accuracyDistribution(0.0, 1.0);
 
-  for (size_t i = 0; i < attempts; i++)
+  std::random_device rd2;
+  std::mt19937_64 randomDamageGenerator(rd2());
+
+  for (size_t i = 0; i < simulationAttempts; i++)
   {
-    int attack;
+    int currentAttempt = i + 1;
+    int firstHit;
+    int secondHit;
+    int thirdHit;
+    int fourthHit;
+    int totalDamage;
 
-    if(accuracy >= accDistribution(accGenerator)) 
-    { // Hit first
-      int dmg = randDamage(static_cast<int>(maxhit * 0.5), maxhit - 1);
-      attack = dmg + static_cast<int>(dmg * 0.5) + static_cast<int>(dmg * 0.25) + (static_cast<int>(dmg * 0.25) + 1);
-      std::cout << std::setw(attemptsWidth) << std::right << i + 1                            << " : "
-                << std::setw(2)             << std::right << attack                           << " - "
-                << std::setw(2)             << std::right << dmg                              << " + "
-                << std::setw(2)             << std::right << static_cast<int>(dmg * 0.5)      << " + "
-                << std::setw(2)             << std::right << static_cast<int>(dmg * 0.25)     << " + "
-                << std::setw(2)             << std::right << static_cast<int>(dmg * 0.25) + 1 << "\n";
+    if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator)) 
+    { // Pass first accuracy check
+      firstHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.5), dragonClaws.maxHit - 1, randomDamageGenerator);
+      secondHit = static_cast<int>(firstHit * 0.5);
+      thirdHit = static_cast<int>(secondHit * 0.5);
+      fourthHit = thirdHit + 1;
+      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      if (verbose) {
+        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+      }
     }
-    else if (accuracy >= accDistribution(accGenerator))
-    { // Hit second
-      int dmg = randDamage(static_cast<int>(maxhit * 0.375), static_cast<int>(maxhit * 0.875));
-      attack = 0 + dmg + static_cast<int>(dmg * 0.5) + (static_cast<int>(dmg * 0.5) + 1);
-      std::cout << std::setw(attemptsWidth) << std::right << i + 1                           << " : "
-                << std::setw(2)             << std::right << attack                          << " : "
-                << std::setw(2)             << std::right << 0                               << " + "
-                << std::setw(2)             << std::right << dmg                             << " + "
-                << std::setw(2)             << std::right << static_cast<int>(dmg * 0.5)     << " + "
-                << std::setw(2)             << std::right << static_cast<int>(dmg * 0.5) + 1 << "\n";
+    else if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator))
+    { // Pass second accuracy check
+      firstHit = 0;
+      secondHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.375), static_cast<int>(dragonClaws.maxHit * 0.875), randomDamageGenerator);
+      thirdHit = static_cast<int>(secondHit * 0.5);
+      fourthHit = thirdHit + 1;
+      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      if (verbose) {
+        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+      }
     }
-    else if (accuracy >= accDistribution(accGenerator))
-    { // Hit third
-      int dmg = randDamage(static_cast<int>(maxhit * 0.25), static_cast<int>(maxhit * 0.75));
-      attack = 0 + 0 + dmg + (dmg + 1);
-      std::cout << std::setw(attemptsWidth) << std::right << i + 1   << " : "
-                << std::setw(2)             << std::right << attack  << " : "
-                << std::setw(2)             << std::right << 0       << " + "
-                << std::setw(2)             << std::right << 0       << " + "
-                << std::setw(2)             << std::right << dmg     << " + "
-                << std::setw(2)             << std::right << dmg + 1 << "\n";
+    else if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator))
+    { // Pass third accuracy check
+      firstHit = 0;
+      secondHit = 0;
+      thirdHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.25), static_cast<int>(dragonClaws.maxHit * 0.75), randomDamageGenerator);
+      fourthHit = thirdHit + 1;
+      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      if (verbose) {
+        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+      }
     }
-    else if (accuracy >= accDistribution(accGenerator))
-    { // Hit fourth
-      int dmg = randDamage(static_cast<int>(maxhit * 0.25), static_cast<int>(maxhit * 1.25));
-      attack = 0 + 0 + 0 + dmg;
-      std::cout << std::setw(attemptsWidth) << std::right << i + 1  << " : "
-                << std::setw(2)             << std::right << attack << " : "
-                << std::setw(2)             << std::right << 0      << " + "
-                << std::setw(2)             << std::right << 0      << " + "
-                << std::setw(2)             << std::right << 0      << " + "
-                << std::setw(2)             << std::right << dmg    << "\n";
+    else if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator))
+    { // Pass fourth accuracy check
+      firstHit = 0;
+      secondHit = 0;
+      thirdHit = 0;
+      fourthHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.25), static_cast<int>(dragonClaws.maxHit * 1.25), randomDamageGenerator);
+      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      if (verbose) {
+        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+      }
     }
     else
-    { // Miss
-      if(randDamage(0, 2) < 2)
+    { // Fail all accuracy checks
+      if (randomDamage(0, 2, randomDamageGenerator) < 2)
       {
-        attack = 0 + 0 + 1 + 1;
-        std::cout << std::setw(attemptsWidth) << std::right << i + 1  << " : "
-                  << std::setw(2)             << std::right << attack << " : "
-                  << std::setw(2)             << std::right << 0      << " + "
-                  << std::setw(2)             << std::right << 0      << " + "
-                  << std::setw(2)             << std::right << 1      << " + "
-                  << std::setw(2)             << std::right << 1      << "\n";
+        firstHit = 0;
+        secondHit = 0;
+        thirdHit = 1;
+        fourthHit = 1;
+        totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+        if (verbose) {
+          printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+        }
       }
       else
       {
-        attack = 0 + 0 + 0 + 0;
-        std::cout << std::setw(attemptsWidth) << std::right << i + 1  << " : "
-                  << std::setw(2)             << std::right << attack << " : "
-                  << std::setw(2)             << std::right << 0      << " + "
-                  << std::setw(2)             << std::right << 0      << " + "
-                  << std::setw(2)             << std::right << 0      << " + "
-                  << std::setw(2)             << std::right << 0      << "\n";
+        firstHit = 0;
+        secondHit = 0;
+        thirdHit = 0;
+        fourthHit = 0;
+        totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+        if (verbose) {
+          printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+        } 
       }
     }
 
-    simulation.push_back(attack);
+    simulation.push_back(totalDamage);
   }
 
-  double damageAverage = getAverage(simulation);
-  double damagePerSecond = (damageAverage / atkspd) / 0.6;
+  double damageAverage = vectorMeanAverage(simulation);
+  double damagePerSecond = (damageAverage / dragonClaws.attackSpeedTicks) / 0.6;
 
   std::cout << "\n"
             << "Simulated "    << simulation.size() << " attacks\n"
