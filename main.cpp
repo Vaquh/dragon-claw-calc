@@ -5,10 +5,24 @@
 #include <string>
 #include <vector>
 
-struct Weapon {
+struct Weapon 
+{
   int attackSpeedTicks;
   double accuracy;
   int maxHit;
+};
+
+struct Attack 
+{
+  int firstHit;
+  int secondHit;
+  int thirdHit;
+  int fourthHit;
+
+  int totalDamage ()
+  {
+    return firstHit + secondHit + thirdHit + fourthHit;
+  }
 };
 
 int randomDamage (int minHit, int maxHit, std::mt19937_64& randomDamageGenerator)
@@ -57,83 +71,73 @@ int main()
   for (size_t i = 0; i < simulationAttempts; i++)
   {
     int currentAttempt = i + 1;
-    int firstHit;
-    int secondHit;
-    int thirdHit;
-    int fourthHit;
-    int totalDamage;
+    Attack currentAttack;
 
     if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator)) 
     { // Pass first accuracy check
-      firstHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.5), dragonClaws.maxHit - 1, randomDamageGenerator);
-      secondHit = static_cast<int>(firstHit * 0.5);
-      thirdHit = static_cast<int>(secondHit * 0.5);
-      fourthHit = thirdHit + 1;
-      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      currentAttack.firstHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.5), dragonClaws.maxHit - 1, randomDamageGenerator);
+      currentAttack.secondHit = static_cast<int>(currentAttack.firstHit * 0.5);
+      currentAttack.thirdHit = static_cast<int>(currentAttack.secondHit * 0.5);
+      currentAttack.fourthHit = currentAttack.thirdHit + 1;
       if (verbose) {
-        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+        printDamageRoll(attemptsWidth, currentAttempt, currentAttack.totalDamage(), currentAttack.firstHit, currentAttack.secondHit, currentAttack.thirdHit, currentAttack.fourthHit);
       }
     }
     else if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator))
     { // Pass second accuracy check
-      firstHit = 0;
-      secondHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.375), static_cast<int>(dragonClaws.maxHit * 0.875), randomDamageGenerator);
-      thirdHit = static_cast<int>(secondHit * 0.5);
-      fourthHit = thirdHit + 1;
-      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      currentAttack.firstHit = 0;
+      currentAttack.secondHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.375), static_cast<int>(dragonClaws.maxHit * 0.875), randomDamageGenerator);
+      currentAttack.thirdHit = static_cast<int>(currentAttack.secondHit * 0.5);
+      currentAttack.fourthHit = currentAttack.thirdHit + 1;
       if (verbose) {
-        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+        printDamageRoll(attemptsWidth, currentAttempt, currentAttack.totalDamage(), currentAttack.firstHit, currentAttack.secondHit, currentAttack.thirdHit, currentAttack.fourthHit);
       }
     }
     else if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator))
     { // Pass third accuracy check
-      firstHit = 0;
-      secondHit = 0;
-      thirdHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.25), static_cast<int>(dragonClaws.maxHit * 0.75), randomDamageGenerator);
-      fourthHit = thirdHit + 1;
-      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      currentAttack.firstHit = 0;
+      currentAttack.secondHit = 0;
+      currentAttack.thirdHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.25), static_cast<int>(dragonClaws.maxHit * 0.75), randomDamageGenerator);
+      currentAttack.fourthHit = currentAttack.thirdHit + 1;
       if (verbose) {
-        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+        printDamageRoll(attemptsWidth, currentAttempt, currentAttack.totalDamage(), currentAttack.firstHit, currentAttack.secondHit, currentAttack.thirdHit, currentAttack.fourthHit);
       }
     }
     else if (dragonClaws.accuracy >= accuracyDistribution(accuracyGenerator))
     { // Pass fourth accuracy check
-      firstHit = 0;
-      secondHit = 0;
-      thirdHit = 0;
-      fourthHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.25), static_cast<int>(dragonClaws.maxHit * 1.25), randomDamageGenerator);
-      totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+      currentAttack.firstHit = 0;
+      currentAttack.secondHit = 0;
+      currentAttack.thirdHit = 0;
+      currentAttack.fourthHit = randomDamage(static_cast<int>(dragonClaws.maxHit * 0.25), static_cast<int>(dragonClaws.maxHit * 1.25), randomDamageGenerator);
       if (verbose) {
-        printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+        printDamageRoll(attemptsWidth, currentAttempt, currentAttack.totalDamage(), currentAttack.firstHit, currentAttack.secondHit, currentAttack.thirdHit, currentAttack.fourthHit);
       }
     }
     else
     { // Fail all accuracy checks
       if (randomDamage(0, 2, randomDamageGenerator) < 2)
       {
-        firstHit = 0;
-        secondHit = 0;
-        thirdHit = 1;
-        fourthHit = 1;
-        totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+        currentAttack.firstHit = 0;
+        currentAttack.secondHit = 0;
+        currentAttack.thirdHit = 1;
+        currentAttack.fourthHit = 1;
         if (verbose) {
-          printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+          printDamageRoll(attemptsWidth, currentAttempt, currentAttack.totalDamage(), currentAttack.firstHit, currentAttack.secondHit, currentAttack.thirdHit, currentAttack.fourthHit);
         }
       }
       else
       {
-        firstHit = 0;
-        secondHit = 0;
-        thirdHit = 0;
-        fourthHit = 0;
-        totalDamage = firstHit + secondHit + thirdHit + fourthHit;
+        currentAttack.firstHit = 0;
+        currentAttack.secondHit = 0;
+        currentAttack.thirdHit = 0;
+        currentAttack.fourthHit = 0;
         if (verbose) {
-          printDamageRoll(attemptsWidth, currentAttempt, totalDamage, firstHit, secondHit, thirdHit, fourthHit);
+          printDamageRoll(attemptsWidth, currentAttempt, currentAttack.totalDamage(), currentAttack.firstHit, currentAttack.secondHit, currentAttack.thirdHit, currentAttack.fourthHit);
         } 
       }
     }
 
-    simulation.push_back(totalDamage);
+    simulation.push_back(currentAttack.totalDamage());
   }
 
   double damageAverage = vectorMeanAverage(simulation);
